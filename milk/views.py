@@ -36,12 +36,12 @@ class TrainView(generic.FormView):
     def form_valid(self, form):
         # アップロードファイル本体を取得
         target_dir = form.cleaned_data['target_directory']
-        # files = load_data(target_dir)
-        # img = Image.open(files[0])
-        # print(img.size)
+        files, model = load_data(target_dir)
 
         context = {
-             'target_directory': target_dir,
+            'target_directory': target_dir,
+            'model': model.layers,
+            'files': files
         }
         return render(self.request, 'milk/build_model.html', context)
 

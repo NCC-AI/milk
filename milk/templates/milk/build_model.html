@@ -1,4 +1,7 @@
 {% extends 'milk/base.html' %}
 {% block content %}
 <p>{{ target_directory }} ファルダ内の画像をアップロードします。</p>
+{% load static%}
+<img src="{% static "milk/model.png" %}">
+<p>{{ files }} </p>
 {% endblock %}

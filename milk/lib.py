@@ -2,15 +2,21 @@ import pickle
 from sklearn import datasets, svm
 from sklearn.model_selection import train_test_split
 from glob import glob
-import cv2
+from ncc.models import conv3d
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MEDIA_ROOT = os.path.join(BASE_DIR, 'milk/static')
 
 
 def load_data(target_dir):
     """訓練データセットを読み込む"""
-    # x_train, y_train = [], []
     files = glob(target_dir+'/*/*.jpg')
+    model = conv3d(input_dim=(32, 256, 256, 3), num_classes=10)
+    from keras.utils import plot_model
+    plot_model(model, to_file=MEDIA_ROOT+'/milk/model.png')
 
-    return files
+    return files, model
 
 
 def read():
