@@ -1,4 +1,4 @@
-# milk@  (machine intelligence in lazy kingdom) 🐮🥛
+# milk@  (machine intelligence in lazy kingdom) 🥛
 
 ```
 python manage.py runserver
