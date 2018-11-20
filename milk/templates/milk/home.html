@@ -1,0 +1,8 @@
+{% extends 'milk/base.html' %}
+{% block content %}
+<form action="" method="POST">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-primary">処理の開始</button>
+</form>
+{% endblock %}
+
