@@ -9,7 +9,9 @@ from .forms import ImageUploadForm, DirectoryPathForm
 from .lib import predict, load_data
 import numpy as np
 from PIL import Image
+
 import os
+import matplotlib.pyplot as plt
 
 print(os.getcwd())
 
@@ -69,12 +71,38 @@ def update(pk, directory):
     """裏側で動いている時間のかかる処理"""
     progress = get_object_or_404(Progress, pk=pk)
     (x_train, y_train), (x_test, y_test), model = load_data(directory)
+
     progress.nb_train = len(x_train)
-    train_model(model, x_train, y_train, x_test, y_test)
-    for i in range(1, 11):
-        time.sleep(1)
-        progress.num = i * 10  # 初回に10、次に20...最後は100が入る。進捗のパーセントに対応
+    optimizer = 'adam'
+    loss = 'categorical_crossentropy'
+    metrics = ['acc']
+    epochs = 30
+    batch_size = 16
+
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+    history = dict(acc=[], val_acc=[])
+    for epoch in range(epochs):
+        hist = model.fit(x_train, y_train,
+                            epochs=1,
+                            batch_size=batch_size,
+                            validation_data=(x_test, y_test)
+                            )
+        # acc, val_accを数値で受け取る
+        history['acc'].append(hist.history['acc'])
+        history['val_acc'].append(hist.history['val_acc'])
+        # accのグラフを描画
+        plt.plot(history['acc'], "o-", label="accuracy")
+        plt.plot(history['val_acc'], "o-", label="validation_accuracy")
+        plt.title('model accuracy')
+        plt.xlabel('epoch')
+        plt.ylabel('accuracy')
+        plt.ylim([0, 1.05])
+        plt.legend(loc="lower right")
+        plt.savefig(MEDIA_ROOT+'/milk/model_acc.png')
+        # progress.htmlのprogress barに表示する．Max100に広げる
+        progress.epochs = int( (epoch+1) * 100/30 )
         progress.save()
+    model.save('model.h5')
 
 def train_model(model, x_train, y_train, x_test, y_test):
     optimizer = 'adam'

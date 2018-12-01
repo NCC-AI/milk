@@ -2,21 +2,25 @@
 
 {% block content %}
 <meta http-equiv="refresh" content="3">
-{% if progress.num >= 100 %}
+
+{% if progress.epochs == 100 %}
   処理終了
+
 {% else %}
+  {% if progress.epochs > 0 %}
+    <div>{{ progress.nb_train }}</div>
+  {% else %}
+    <div>データロード中...</div>
+  {% endif %}
 
-{% if progress.num > 0 %}
-  <div>{{ progress.nb_train }}</div>
-{% endif %}
+    <div class="progress">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ progress.epochs }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress.epochs }}%"></div>
+    </div>
 
-  <div class="progress">
-    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ progress.num }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress.num }}%"></div>
-  </div>
+    {% load static %}
 
-  {% load static%}
-
-  <img src="{% static "milk/model.png" %}">
+    <img src="{% static "milk/model.png" %}">
+    <img src="{% static "milk/hist_acc.png" %}">
 
 {% endif %}
 {% endblock %}

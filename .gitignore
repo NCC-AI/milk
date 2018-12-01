@@ -109,3 +109,6 @@ venv.bak/
 
 # migration
 milk/migrations/
+
+# .h5
+.h5
