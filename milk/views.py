@@ -31,38 +31,46 @@ class UploadView(generic.FormView):
         return render(self.request, 'milk/result.html', context)
 
 
-class TrainView(generic.FormView):
-    template_name = 'milk/train.html'
+class TrainView(generic.CreateView):
+    model = Progress
     form_class = DirectoryPathForm
+    template_name = 'milk/train.html'
 
     def form_valid(self, form):
-        target_dir = form.cleaned_data['target_directory']
-        files, model = load_data(target_dir)
-
+        progress_instance = form.save()
+        p = Process(target=update, args=(progress_instance.pk, progress_instance.target), daemon=True)
+        p.start()
+        
+        """
         context = {
             'target_directory': target_dir,
             'model': model.layers,
             'files': files
         }
-        return render(self.request, 'milk/build_model.html', context)
+        """
+        return redirect('milk:progress', pk=progress_instance.pk)
 
 
 class HomeView(generic.CreateView):
     """処理の開始ページ"""
     model = Progress
-    fields = ()
+    form_class = DirectoryPathForm
     template_name = 'milk/home.html'
 
     def form_valid(self, form):
+        print('test: ', form.instance.num)
         progress_instance = form.save()
         p = Process(target=update, args=(progress_instance.pk,), daemon=True)
         p.start()
         return redirect('milk:progress', pk=progress_instance.pk)
 
 
-def update(pk):
+def update(pk, directory):
     """裏側で動いている時間のかかる処理"""
     progress = get_object_or_404(Progress, pk=pk)
+    files, model = load_data(directory)
+    progress.nb_train = len(files)
+    print('nb_files', len(files))
     for i in range(1, 11):
         time.sleep(1)
         progress.num = i * 10  # 初回に10、次に20...最後は100が入る。進捗のパーセントに対応

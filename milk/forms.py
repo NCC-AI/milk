@@ -1,13 +1,11 @@
 from django import forms
+from .models import Progress
 
 
-class DirectoryPathForm(forms.Form):
-    target_directory = forms.CharField(
-        label='データセットフォルダパス',
-        max_length=200,
-        required=True,
-        widget=forms.TextInput()
-    )
+class DirectoryPathForm(forms.ModelForm):
+    class Meta:
+        model = Progress
+        fields = ("target", )
 
 
 class ImageUploadForm(forms.Form):
