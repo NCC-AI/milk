@@ -6,7 +6,12 @@
   処理終了
 {% else %}
   <div class="progress">
+    {% if progress.num > 0 %}
+    <div>{{ progress.nb_train }}</div>
+    {% endif %}
     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ progress.num }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress.num }}%"></div>
   </div>
+  {% load static%}
+  <img src="{% static "milk/model.png" %}">
 {% endif %}
 {% endblock %}

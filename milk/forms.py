@@ -5,7 +5,7 @@ from .models import Progress
 class DirectoryPathForm(forms.ModelForm):
     class Meta:
         model = Progress
-        fields = ("num", "target")
+        fields = ("target", )
 
 
 class ImageUploadForm(forms.Form):
