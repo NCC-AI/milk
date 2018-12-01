@@ -34,10 +34,10 @@ def load_data(target_dir):
     if x_test is None and y_test is None:
         x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=test_size)
 
-        # prepare data
-        x_train, y_train = preprocess_input(x_train, y_train)
-        x_test, y_test = preprocess_input(x_test, y_test)
-        print(x_train.shape, y_train.shape)
+    # prepare data
+    x_train, y_train = preprocess_input(x_train, y_train)
+    x_test, y_test = preprocess_input(x_test, y_test)
+    print(x_train.shape, y_train.shape)
 
     # data profile
     class_names = list(np.arange(y_train.shape[1]))

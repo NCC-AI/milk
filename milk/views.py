@@ -40,7 +40,7 @@ class TrainView(generic.CreateView):
         progress_instance = form.save()
         p = Process(target=update, args=(progress_instance.pk, progress_instance.target), daemon=True)
         p.start()
-        
+
         """
         context = {
             'target_directory': target_dir,
@@ -68,9 +68,9 @@ class HomeView(generic.CreateView):
 def update(pk, directory):
     """裏側で動いている時間のかかる処理"""
     progress = get_object_or_404(Progress, pk=pk)
-    files, model = load_data(directory)
-    progress.nb_train = len(files)
-    print('nb_files', len(files))
+    (x_train, y_train), (x_test, y_test), model = load_data(directory)
+    progress.nb_train = len(x_train)
+    print('nb_files', len(x_train))
     for i in range(1, 11):
         time.sleep(1)
         progress.num = i * 10  # 初回に10、次に20...最後は100が入る。進捗のパーセントに対応
