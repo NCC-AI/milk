@@ -70,12 +70,27 @@ def update(pk, directory):
     progress = get_object_or_404(Progress, pk=pk)
     (x_train, y_train), (x_test, y_test), model = load_data(directory)
     progress.nb_train = len(x_train)
-    print('nb_files', len(x_train))
+    train_model(model, x_train, y_train, x_test, y_test)
     for i in range(1, 11):
         time.sleep(1)
         progress.num = i * 10  # 初回に10、次に20...最後は100が入る。進捗のパーセントに対応
         progress.save()
 
+def train_model(model, x_train, y_train, x_test, y_test):
+    optimizer = 'adam'
+    loss = 'categorical_crossentropy'
+    metrics = ['acc']
+    epochs = 30
+    batch_size = 16
+    callbacks = []
+
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+    model.fit(x_train, y_train,
+                        epochs=epochs,
+                        batch_size=batch_size,
+                        callbacks=callbacks,
+                        validation_data=(x_test, y_test)
+                        )
 
 def progress(request, pk):
     """現在の進捗ページ"""
