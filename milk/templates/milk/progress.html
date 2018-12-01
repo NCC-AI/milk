@@ -3,8 +3,16 @@
 {% block content %}
 <meta http-equiv="refresh" content="3">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js">
+
+
+</script>
+
+
 {% if progress.epochs == 100 %}
   処理終了
+  {% load static %}
+  <img src="{% static "milk/model_acc.png" %}">
 
 {% else %}
   {% if progress.epochs > 0 %}
@@ -18,9 +26,10 @@
     </div>
 
     {% load static %}
-
     <img src="{% static "milk/model.png" %}">
-    <img src="{% static "milk/hist_acc.png" %}">
+
+    <canvas id="stage"></canvas>
+
 
 {% endif %}
 {% endblock %}

@@ -4,7 +4,7 @@ from multiprocessing import Process
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import generic
 
-from .models import Progress
+from .models import Progress, History
 from .forms import ImageUploadForm, DirectoryPathForm
 from .lib import predict, load_data
 import numpy as np
@@ -14,7 +14,8 @@ import os
 import matplotlib.pyplot as plt
 
 print(os.getcwd())
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MEDIA_ROOT = os.path.join(BASE_DIR, 'milk/static')
 
 class UploadView(generic.FormView):
     template_name = 'milk/upload.html'
@@ -76,49 +77,25 @@ def update(pk, directory):
     optimizer = 'adam'
     loss = 'categorical_crossentropy'
     metrics = ['acc']
-    epochs = 30
+    epochs = 10
     batch_size = 16
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-    history = dict(acc=[], val_acc=[])
     for epoch in range(epochs):
         hist = model.fit(x_train, y_train,
                             epochs=1,
                             batch_size=batch_size,
                             validation_data=(x_test, y_test)
                             )
+
         # acc, val_accを数値で受け取る
-        history['acc'].append(hist.history['acc'])
-        history['val_acc'].append(hist.history['val_acc'])
-        # accのグラフを描画
-        plt.plot(history['acc'], "o-", label="accuracy")
-        plt.plot(history['val_acc'], "o-", label="validation_accuracy")
-        plt.title('model accuracy')
-        plt.xlabel('epoch')
-        plt.ylabel('accuracy')
-        plt.ylim([0, 1.05])
-        plt.legend(loc="lower right")
-        plt.savefig(MEDIA_ROOT+'/milk/model_acc.png')
+        history.acc = hist.history['acc']
+        history.val_acc = hist.history['val_acc']
         # progress.htmlのprogress barに表示する．Max100に広げる
-        progress.epochs = int( (epoch+1) * 100/30 )
-        progress.save()
+        history.epochs = int( (epoch+1) * 100/epochs )
+        history.save()
+
     model.save('model.h5')
-
-def train_model(model, x_train, y_train, x_test, y_test):
-    optimizer = 'adam'
-    loss = 'categorical_crossentropy'
-    metrics = ['acc']
-    epochs = 30
-    batch_size = 16
-    callbacks = []
-
-    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-    model.fit(x_train, y_train,
-                        epochs=epochs,
-                        batch_size=batch_size,
-                        callbacks=callbacks,
-                        validation_data=(x_test, y_test)
-                        )
 
 def progress(request, pk):
     """現在の進捗ページ"""

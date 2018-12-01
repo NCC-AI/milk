@@ -112,3 +112,6 @@ milk/migrations/
 
 # .h5
 .h5
+
+# MacOS
+.DS_Store
