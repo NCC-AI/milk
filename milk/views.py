@@ -75,7 +75,7 @@ def update(pk, directory):
 
     progress.nb_train = len(x_train)
 
-    epochs = 10
+    epochs = 30
     batch_size = 16
 
     for epoch in range(epochs):

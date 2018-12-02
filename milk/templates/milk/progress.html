@@ -16,7 +16,7 @@
   {% if progress.num > 0 %}
     <div>{{ progress.nb_train }}</div>
     {% for history in history_list %}
-    <div>{{ history.acc }}</div>
+    <div>epoch: {{ history.epochs }}, acc: {{ history.acc }}, val_acc: {{ history.val_acc }}</div>
     {% endfor %}
   {% else %}
     <div>データロード中...</div>
