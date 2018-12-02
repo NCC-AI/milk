@@ -8,11 +8,11 @@ class Progress(models.Model):
     nb_train = models.IntegerField('訓練枚数', default=0)
     epochs = models.IntegerField('epoch', default=0)
     acc = models.FloatField('accuracy', default=0)
-    val_acc = model.FloatField('validation_accuracy', default=0)
+    val_acc = models.FloatField('validation_accuracy', default=0)
 
 class History(models.Model):
     """model.fitのhistory"""
-    progress_id = models.ForeignKey(Progress)
+    progress = models.ForeignKey(Progress, on_delete=models.CASCADE)
     epochs = models.IntegerField('epoch', default=0)
     acc = models.FloatField('accuracy', default=0)
-    val_acc = model.FloatField('validation_accuracy', default=0)
+    val_acc = models.FloatField('validation_accuracy', default=0)

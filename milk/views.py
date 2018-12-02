@@ -74,13 +74,10 @@ def update(pk, directory):
     (x_train, y_train), (x_test, y_test), model = load_data(directory)
 
     progress.nb_train = len(x_train)
-    optimizer = 'adam'
-    loss = 'categorical_crossentropy'
-    metrics = ['acc']
+
     epochs = 10
     batch_size = 16
 
-    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     for epoch in range(epochs):
         hist = model.fit(x_train, y_train,
                             epochs=1,

@@ -54,6 +54,13 @@ def load_data(target_dir):
         raise ValueError('input shape is invalid.')
 
     plot_model(model, to_file=MEDIA_ROOT+'/milk/model.png')
+    
+    # training parameter
+    optimizer = 'adam'
+    loss = 'categorical_crossentropy'
+    metrics = ['acc']
+
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     return (x_train, y_train), (x_test, y_test), model
 
