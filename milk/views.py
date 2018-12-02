@@ -87,8 +87,8 @@ def update(pk, directory):
 
         # acc, val_accを数値で受け取る
         progress.history_set.create(
-            acc=hist.history['acc'], 
-            val_acc=hist.history['val_acc'],
+            acc=hist.history['acc'][0], 
+            val_acc=hist.history['val_acc'][0],
             epochs=epoch
         )
 
@@ -99,7 +99,10 @@ def update(pk, directory):
 
 def progress(request, pk):
     """現在の進捗ページ"""
+    progress = get_object_or_404(Progress, pk=pk)
+    history = progress.history_set.all()
     context = {
-        'progress': get_object_or_404(Progress, pk=pk)
+        'progress': progress,
+        'history_list': history
     }
     return render(request, 'milk/progress.html', context)

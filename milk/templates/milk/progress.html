@@ -9,20 +9,21 @@
 </script>
 
 
-{% if progress.epochs == 100 %}
+{% if progress.num == 100 %}
   処理終了
-  {% load static %}
-  <img src="{% static "milk/model_acc.png" %}">
 
 {% else %}
-  {% if progress.epochs > 0 %}
+  {% if progress.num > 0 %}
     <div>{{ progress.nb_train }}</div>
+    {% for history in history_list %}
+    <div>{{ history.acc }}</div>
+    {% endfor %}
   {% else %}
     <div>データロード中...</div>
   {% endif %}
 
     <div class="progress">
-      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ progress.epochs }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress.epochs }}%"></div>
+      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ progress.num }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress.num }}%"></div>
     </div>
 
     {% load static %}
