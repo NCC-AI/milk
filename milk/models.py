@@ -6,9 +6,7 @@ class Progress(models.Model):
     num = models.IntegerField('進捗', default=0)
     target = models.CharField('フォルダ', max_length=200)
     nb_train = models.IntegerField('訓練枚数', default=0)
-    epochs = models.IntegerField('epoch', default=0)
-    acc = models.FloatField('accuracy', default=0)
-    val_acc = models.FloatField('validation_accuracy', default=0)
+    
 
 class History(models.Model):
     """model.fitのhistory"""

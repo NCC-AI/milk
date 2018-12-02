@@ -86,11 +86,14 @@ def update(pk, directory):
                             )
 
         # acc, val_accを数値で受け取る
-        history.acc = hist.history['acc']
-        history.val_acc = hist.history['val_acc']
-        # progress.htmlのprogress barに表示する．Max100に広げる
-        history.epochs = int( (epoch+1) * 100/epochs )
-        history.save()
+        progress.history_set.create(
+            acc=hist.history['acc'], 
+            val_acc=hist.history['val_acc'],
+            epochs=epoch
+        )
+
+        progress.num = int( (epoch+1) * 100/epochs )  # progress.htmlのprogress barに表示する．Max100に広げる
+        progress.save()
 
     model.save('model.h5')
 
