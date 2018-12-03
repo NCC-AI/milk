@@ -99,7 +99,9 @@
 <meta http-equiv="refresh" content="3">
 
   {% if progress.num > 0 %}
-    <div>train size: {{ progress.nb_train }}</div>
+  {% load static %}
+  <img src="{% static "milk/confusion_visualize.png" %}">
+    <div>train_size: {{ progress.nb_train }}</div>
 
     <div class="progress">
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ progress.num }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress.num }}%"></div>

@@ -9,6 +9,7 @@ from .forms import ImageUploadForm, DirectoryPathForm
 from .lib import predict, load_data
 import numpy as np
 from PIL import Image
+import cv2
 
 from sklearn.metrics import roc_curve, auc
 from itertools import cycle
@@ -20,7 +21,6 @@ import matplotlib.pyplot as plt
 
 from keras import backend as k
 
-print(os.getcwd())
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEDIA_ROOT = os.path.join(BASE_DIR, 'milk/static')
 
@@ -100,6 +100,10 @@ def update(pk, directory):
 
         all_fpr, mean_tpr, auc = roc(y_train, y_prediction, nb_classes)
 
+        all_fpr, mean_tpr, auc = roc(y_test, y_prediction, nb_classes)
+
+        confusion_visualize(x_test, np.argmax(y_test, axis=1), y_prediction, [i for i in range(nb_classes)])
+
 
         # print('pca_x: ', pca_x)
         # print('pca_y: ', pca_y)
@@ -119,6 +123,7 @@ def update(pk, directory):
         progress.save()
 
     model.save('model.h5')
+    os.remove(MEDIA_ROOT+'/milk/model.png')
 
 def progress(request, pk):
     """現在の進捗ページ"""
@@ -208,3 +213,29 @@ def roc(y_test, y_prediction, num_classes):
     mean_tpr /= num_classes
 
     return list(all_fpr), list(mean_tpr), auc(all_fpr, mean_tpr)
+
+def confusion_visualize(images, labels, predict_prob, class_names):
+    _, height, width, _ = images.shape
+    frame_percent = 2  # outframe
+    frame = int((height + width) / 2 * (frame_percent/100)) + 1
+    nb_classes = len(class_names)
+    result = np.zeros((height*nb_classes, width*nb_classes, 3))
+    if np.max(images) <= 1:
+        images *= 255
+    predict_cls = np.argmax(predict_prob, axis=1)
+    for true_index in range(nb_classes):
+        for predict_index in range(nb_classes):
+            index_range = np.where((labels==true_index) & (predict_cls==predict_index))
+            prob = predict_prob[index_range]
+            one_picture = np.zeros((height, width, 3))
+            if true_index == predict_index:
+                one_picture[:, :, 1] = 255
+            else:
+                one_picture[:, :, 2] = 255
+            if len(prob) == 0:
+                one_picture[frame:-frame, frame:-frame] = np.zeros((height-2*frame, width-2*frame, 3))
+            else:
+                sort_range = np.argsort(prob[:, predict_index])[::-1]
+                one_picture[frame:-frame, frame:-frame] = images[index_range[0][sort_range][0]][frame:-frame, frame:-frame]
+            result[height*true_index:height*(true_index+1), width*predict_index:width*(predict_index+1)] = one_picture
+    cv2.imwrite(MEDIA_ROOT+'/milk/confusion_visualize.png', result)
