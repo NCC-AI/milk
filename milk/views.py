@@ -82,12 +82,13 @@ def update(pk, directory):
         hist = model.fit(x_train, y_train,
                             epochs=1,
                             batch_size=batch_size,
-                            validation_data=(x_test, y_test)
+                            validation_data=(x_test, y_test),
+                            verbose=0
                             )
 
         # acc, val_accを数値で受け取る
         progress.history_set.create(
-            acc=hist.history['acc'][0], 
+            acc=hist.history['acc'][0],
             val_acc=hist.history['val_acc'][0],
             epochs=epoch
         )
@@ -103,6 +104,9 @@ def progress(request, pk):
     history = progress.history_set.all()
     context = {
         'progress': progress,
-        'history_list': history
+        'history_list': history,
+        'epochs': list(history.values_list('epochs', flat=True)),
+        'acc_list': list(history.values_list('acc', flat=True)),
+        'val_acc_list': list(history.values_list('val_acc', flat=True))
     }
     return render(request, 'milk/progress.html', context)
