@@ -11,7 +11,10 @@ import numpy as np
 from PIL import Image
 
 import os
+import json
 import matplotlib.pyplot as plt
+
+from keras import backend as k
 
 print(os.getcwd())
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -86,12 +89,21 @@ def update(pk, directory):
                             verbose=0
                             )
 
+        pca_x, pca_y = pca(model, x_train, layer_id=-1)
+        
+
+        # print('pca_x: ', pca_x)
+        # print('pca_y: ', pca_y)
+
         # acc, val_accを数値で受け取る
         progress.history_set.create(
             acc=hist.history['acc'][0],
             val_acc=hist.history['val_acc'][0],
-            epochs=epoch
+            epochs=epoch,
+            pca_x=json.dumps(pca_x),
+            pca_y=json.dumps(pca_y)
         )
+
 
         progress.num = int( (epoch+1) * 100/epochs )  # progress.htmlのprogress barに表示する．Max100に広げる
         progress.save()
@@ -102,11 +114,62 @@ def progress(request, pk):
     """現在の進捗ページ"""
     progress = get_object_or_404(Progress, pk=pk)
     history = progress.history_set.all()
+    if len(list(history.values_list('pca_x'))) != 0:
+        pca_str_list = json.loads(list(history.values_list('pca_x'))[0][0])
+        pca_int_list = [float(x) for x in pca_str_list]
+        pca_x = pca_int_list
+
+        pca_str_list = json.loads(list(history.values_list('pca_y'))[0][0])
+        pca_int_list = [float(y) for y in pca_str_list]
+        pca_y = pca_int_list
+
+    else: 
+        pca_x = [0]
+        pca_y = [0]
+
     context = {
         'progress': progress,
         'history_list': history,
         'epochs': list(history.values_list('epochs', flat=True)),
         'acc_list': list(history.values_list('acc', flat=True)),
-        'val_acc_list': list(history.values_list('val_acc', flat=True))
+        'val_acc_list': list(history.values_list('val_acc', flat=True)),
+        'pca_x': pca_x,
+        'pca_y': pca_y
     }
     return render(request, 'milk/progress.html', context)
+
+def pca(model, images, layer_id=-2):
+    # layer_id = -2 , which means just before final output
+    get_fc_layer_output = k.function([model.layers[0].input, k.learning_phase()],
+                                    [model.layers[layer_id].output])
+
+    # output in test mode = 0
+    features = get_fc_layer_output([images, 0])[0]
+    
+
+    # Convert the data set to the main component based on the analysis result
+    transformed = fit_transform(features)
+
+    return list(transformed[:, 0].astype('str')), list(transformed[:, 1].astype('str'))
+
+def fit_transform(x):
+    n_components = 2
+
+    # 平均を0にする
+    x = x - x.mean(axis=0)
+    cov_ = np.cov(x, rowvar=False)
+
+    # 固有値と固有ベクトルを求めて固有値の大きい順にソート
+    l, v = np.linalg.eig(cov_)
+    l_index = np.argsort(l)[::-1]
+    v_ = v[:,l_index] # 列ベクトルなのに注意
+
+    # components_（固有ベクトル行列を途中まで取り出す）を作る
+    components_ = v_[:,:n_components].T
+
+    # データとcomponents_をかける
+    # 上と下で二回転置してるのアホ・・・
+    T = (np.mat(x)*(np.mat(components_.T))).A
+
+    # 出力
+    return T

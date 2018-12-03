@@ -14,3 +14,7 @@ class History(models.Model):
     epochs = models.IntegerField('epoch', default=0)
     acc = models.FloatField('accuracy', default=0)
     val_acc = models.FloatField('validation_accuracy', default=0)
+
+    pca_x = models.CharField(max_length=5000)
+    pca_y = models.CharField(max_length=5000)
+    
