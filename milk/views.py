@@ -10,6 +10,10 @@ from .lib import predict, load_data
 import numpy as np
 from PIL import Image
 
+from sklearn.metrics import roc_curve, auc
+from itertools import cycle
+from scipy import interp
+
 import os
 import json
 import matplotlib.pyplot as plt
@@ -78,6 +82,7 @@ def update(pk, directory):
 
     progress.nb_train = len(x_train)
 
+    nb_classes = y_train.shape[1]
     epochs = 30
     batch_size = 16
 
@@ -89,7 +94,11 @@ def update(pk, directory):
                             verbose=0
                             )
 
-        pca_x, pca_y = pca(model, x_train, layer_id=-1)
+        # pca_x, pca_y = pca(model, x_train, layer_id=-1)
+
+        y_prediction = model.predict(x_test)
+
+        all_fpr, mean_tpr, auc = roc(y_test, y_prediction, nb_classes)
         
 
         # print('pca_x: ', pca_x)
@@ -100,8 +109,9 @@ def update(pk, directory):
             acc=hist.history['acc'][0],
             val_acc=hist.history['val_acc'][0],
             epochs=epoch,
-            pca_x=json.dumps(pca_x),
-            pca_y=json.dumps(pca_y)
+            fpr=json.dumps(all_fpr),
+            tpr=json.dumps(mean_tpr),
+            auc=auc
         )
 
 
@@ -114,12 +124,12 @@ def progress(request, pk):
     """現在の進捗ページ"""
     progress = get_object_or_404(Progress, pk=pk)
     history = progress.history_set.all()
-    if len(list(history.values_list('pca_x'))) != 0:
-        pca_str_list = json.loads(list(history.values_list('pca_x'))[0][0])
+    if len(list(history.values_list('fpr'))) != 0:
+        pca_str_list = json.loads(list(history.values_list('fpr'))[0][0])
         pca_int_list = [float(x) for x in pca_str_list]
         pca_x = pca_int_list
 
-        pca_str_list = json.loads(list(history.values_list('pca_y'))[0][0])
+        pca_str_list = json.loads(list(history.values_list('tpr'))[0][0])
         pca_int_list = [float(y) for y in pca_str_list]
         pca_y = pca_int_list
 
@@ -133,8 +143,9 @@ def progress(request, pk):
         'epochs': list(history.values_list('epochs', flat=True)),
         'acc_list': list(history.values_list('acc', flat=True)),
         'val_acc_list': list(history.values_list('val_acc', flat=True)),
-        'pca_x': pca_x,
-        'pca_y': pca_y
+        'fpr': pca_x,
+        'tpr': pca_y,
+        'auc': list(history.values_list('auc', flat=True))
     }
     return render(request, 'milk/progress.html', context)
 
@@ -173,3 +184,27 @@ def fit_transform(x):
 
     # 出力
     return T
+
+def roc(y_test, y_prediction, num_classes):
+    # Compute ROC curve and ROC area for each class
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+
+    for i in range(num_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_prediction[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    # Compute macro-average ROC curve and ROC area
+    # First aggregate all false positive rates
+    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(num_classes)]))
+
+    # Then interpolate all ROC curves at this points
+    mean_tpr = np.zeros_like(all_fpr)
+    for i in range(num_classes):
+        mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+
+    # Finally average it and compute AUC
+    mean_tpr /= num_classes
+
+    return list(all_fpr), list(mean_tpr), auc(all_fpr, mean_tpr)

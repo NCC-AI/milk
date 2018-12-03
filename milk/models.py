@@ -15,6 +15,7 @@ class History(models.Model):
     acc = models.FloatField('accuracy', default=0)
     val_acc = models.FloatField('validation_accuracy', default=0)
 
-    pca_x = models.CharField(max_length=5000)
-    pca_y = models.CharField(max_length=5000)
+    fpr = models.CharField(max_length=5000)
+    tpr = models.CharField(max_length=5000)
+    auc = models.FloatField('auc', default=0)
     
