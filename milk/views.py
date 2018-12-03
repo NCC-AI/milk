@@ -90,7 +90,7 @@ def update(pk, directory):
                             )
 
         pca_x, pca_y = pca(model, x_train, layer_id=-1)
-        
+
 
         # print('pca_x: ', pca_x)
         # print('pca_y: ', pca_y)
@@ -123,7 +123,7 @@ def progress(request, pk):
         pca_int_list = [float(y) for y in pca_str_list]
         pca_y = pca_int_list
 
-    else: 
+    else:
         pca_x = [0]
         pca_y = [0]
 
@@ -145,7 +145,7 @@ def pca(model, images, layer_id=-2):
 
     # output in test mode = 0
     features = get_fc_layer_output([images, 0])[0]
-    
+
 
     # Convert the data set to the main component based on the analysis result
     transformed = fit_transform(features)

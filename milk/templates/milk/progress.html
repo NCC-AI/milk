@@ -9,32 +9,69 @@
 {% if progress.num == 100 %}
   <div>
     処理終了
+    <script>
+
+
+      function genData(){
+          var size = getRandomInt( 20, 100 );
+          var data = [];
+          for( var i = 0; i < size; i++ ) {
+              var x = getRandomInt( 0, 100 );
+              var y = getRandomInt( 0, 100 );
+              data.push( { x:x, y:y });
+          }
+          return data;
+      };
+    </script>
   </div>
+
   <div>
     <canvas id="accuracy"></canvas>
+  </div>
+
+  <div>
+    <canvas id="roc"></canvas>
     <script>
-      var ctx = document.getElementById('accuracy').getContext('2d');
-      var accuracy = new Chart(ctx, {
+      var ctx = document.getElementById('roc').getContext('2d');
+      var roc = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: {{ epochs }},
+          labels: {{ false_positive_rate }},
           datasets: [{
-            label: 'acc',
-            data: {{ acc_list }},
+            label: 'ROC',
+            data: {{ true_positive_rate }},
             backgroundColor: "rgba(153,255,51,0.4)",
             borderColor: "rgba(153,255,51,0.4)",
-            lineTension: 0
-          }, {
-            label: 'val_acc',
-            data: {{ val_acc_list }},
-            backgroundColor: "rgba(255,153,0,0.4)",
-            borderColor: "rgba(255,153,0,0.4)",
             lineTension: 0
           }]
         }
       });
     </script>
   </div>
+
+
+  <script>
+    var ctx = document.getElementById('accuracy').getContext('2d');
+    var accuracy = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ epochs }},
+        datasets: [{
+          label: 'acc',
+          data: {{ acc_list }},
+          backgroundColor: "rgba(153,255,51,0.4)",
+          borderColor: "rgba(153,255,51,0.4)",
+          lineTension: 0
+        }, {
+          label: 'val_acc',
+          data: {{ val_acc_list }},
+          backgroundColor: "rgba(255,153,0,0.4)",
+          borderColor: "rgba(255,153,0,0.4)",
+          lineTension: 0
+        }]
+      }
+    });
+  </script>
 
 
 {% else %}
@@ -71,8 +108,42 @@
       });
     </script>
 
-  <div>{{ pca_x }}</div>
-  <div>{{ pca_y }}</div>
+    <canvas id="roc"></canvas>
+    <script>
+      var ctx = document.getElementById('roc').getContext('2d');
+      var roc = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ false_positive_rate }},
+          datasets: [{
+            label: 'ROC',
+            data: {{ true_positive_rate }},
+            backgroundColor: "rgba(153,255,51,0.4)",
+            borderColor: "rgba(153,255,51,0.4)",
+            lineTension: 0
+          }]
+        }
+      });
+    </script>
+
+    <canvas id="pca"></canvas>
+    <script>
+      var ctx = document.getElementById('pca').getContext('2d');
+      var pca = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ pca_x }},
+          datasets: [{
+            label: 'pca',
+            data: {{ pca_y }},
+            backgroundColor: "rgba(225,95,150, 1)",
+            borderColor: "rgba(255,255,255,1)",
+            lineTension: 0
+          }]
+        }
+      });
+    </script>
+
 
   {% else %}
     <div>データロード中...</div>
