@@ -100,9 +100,7 @@ def update(pk, directory):
 
         all_fpr, mean_tpr, auc = roc(y_train, y_prediction, nb_classes)
 
-        all_fpr, mean_tpr, auc = roc(y_test, y_prediction, nb_classes)
-
-        confusion_visualize(x_test, np.argmax(y_test, axis=1), y_prediction, [i for i in range(nb_classes)])
+        confusion_visualize(x_train, np.argmax(y_train, axis=1), y_prediction, [i for i in range(nb_classes)])
 
 
         # print('pca_x: ', pca_x)

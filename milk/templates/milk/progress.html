@@ -138,6 +138,7 @@
     <canvas id="roc" width="200" height="200"></canvas>
     <script>
       // ROC
+      var line_y = d3.range(0, 1, 1/{{fpr}}.length);
       var ctx = document.getElementById('roc').getContext('2d');
       var roc = new Chart(ctx, {
         type: 'line',
@@ -149,6 +150,14 @@
             backgroundColor: "rgba(153,255,51,0.4)",
             borderColor: "rgba(153,255,51,0.4)",
             lineTension: 0
+          }, {
+            label: 'y=x',
+            data: line_y,
+            lineTension: 0,
+            fill: false,
+            pointRadius: 0,
+            borderDash: [0.1, 0.1],
+            borderColor: "rgb(0,0,0)"
           }]
         }
       });
