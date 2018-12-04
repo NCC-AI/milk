@@ -217,23 +217,49 @@ def confusion_visualize(images, labels, predict_prob, class_names):
     frame_percent = 2  # outframe
     frame = int((height + width) / 2 * (frame_percent/100)) + 1
     nb_classes = len(class_names)
+
+    ffamily_title = cv2.FONT_HERSHEY_TRIPLEX
+    linetype = cv2.LINE_AA
+    
     result = np.zeros((height*nb_classes, width*nb_classes, 3))
+    matrix = np.zeros((height*nb_classes, width*nb_classes, 3))
+
+    max_predict_num = 0
+
     if np.max(images) <= 1:
         images *= 255
     predict_cls = np.argmax(predict_prob, axis=1)
     for true_index in range(nb_classes):
         for predict_index in range(nb_classes):
             index_range = np.where((labels==true_index) & (predict_cls==predict_index))
+            predict_num = len(index_range[0])  # matrix number
+            if max_predict_num < predict_num:
+                max_predict_num = predict_num
+            
             prob = predict_prob[index_range]
             one_picture = np.zeros((height, width, 3))
+            one_picture_matrix = np.zeros((height, width, 3)).astype('uint8')
             if true_index == predict_index:
                 one_picture[:, :, 1] = 255
+                one_picture_matrix[:, :, 1] = 255
             else:
                 one_picture[:, :, 2] = 255
+                one_picture_matrix[:, :, 2] = 255
+
+            one_picture_matrix[frame:-frame, frame:-frame] = 0
             if len(prob) == 0:
                 one_picture[frame:-frame, frame:-frame] = np.zeros((height-2*frame, width-2*frame, 3))
+                
             else:
                 sort_range = np.argsort(prob[:, predict_index])[::-1]
                 one_picture[frame:-frame, frame:-frame] = images[index_range[0][sort_range][0]][frame:-frame, frame:-frame]
+                cv2.putText(one_picture_matrix, str(predict_num), (width//4, height//2), ffamily_title, 0.5, (255,255,255), 1, linetype)
+                # one_picture_matrix[frame:-frame, frame:-frame, 0] = predict_num
+
             result[height*true_index:height*(true_index+1), width*predict_index:width*(predict_index+1)] = one_picture
+            matrix[height*true_index:height*(true_index+1), width*predict_index:width*(predict_index+1)] = one_picture_matrix.copy()
+        
+        # matrix[:, :, 0] *= (255/predict_num)
+
     cv2.imwrite(MEDIA_ROOT+'/milk/confusion_visualize.png', result)
+    cv2.imwrite(MEDIA_ROOT+'/milk/confusion_matrix.png', matrix)
