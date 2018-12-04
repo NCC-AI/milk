@@ -6,7 +6,7 @@ class Progress(models.Model):
     num = models.IntegerField('進捗', default=0)
     target = models.CharField('フォルダ', max_length=200)
     nb_train = models.IntegerField('訓練枚数', default=0)
-    
+
 
 class History(models.Model):
     """model.fitのhistory"""
@@ -18,4 +18,3 @@ class History(models.Model):
     fpr = models.CharField(max_length=5000)
     tpr = models.CharField(max_length=5000)
     auc = models.FloatField('auc', default=0)
-    

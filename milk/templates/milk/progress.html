@@ -3,16 +3,18 @@
 {% block content %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
-
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
 
 {% if progress.num == 100 %}
   <div>
     処理終了
   </div>
-  <div>
-    <canvas id="accuracy"></canvas>
+
+  <div class="container" style="width:50%">
+    <canvas id="accuracy" width="250px" height="150px"></canvas>
     <script>
+      // accuracy
       var ctx = document.getElementById('accuracy').getContext('2d');
       var accuracy = new Chart(ctx, {
         type: 'line',
@@ -35,6 +37,62 @@
       });
     </script>
   </div>
+
+  <div class="container" style="width:50%">
+    <canvas id="roc" width="250px" height="250px"></canvas>
+    <script>
+      // ROC
+      var line_y = d3.range(0, 1, 1/{{fpr}}.length);
+      var ctx = document.getElementById('roc').getContext('2d');
+      var roc = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ fpr }},
+          datasets: [{
+            label: 'ROC',
+            data: {{ tpr }},
+            backgroundColor: "rgba(153,255,51,0.4)",
+            borderColor: "rgba(153,255,51,0.4)",
+            lineTension: 0
+          }, {
+            label: 'y=x',
+            data: line_y,
+            lineTension: 0,
+            fill: false,
+            pointRadius: 0,
+            borderDash: [0.1, 0.1],
+            borderColor: "rgb(0,0,0)"
+          }]
+        },
+        options: {
+          legend: {
+            labels: {
+              filter: function (item, chart) {
+                return !item.text.includes('y=x');
+              }
+            }
+          }
+        }
+      });
+    </script>
+  </div>
+
+
+  <script>
+
+    // scatter plot data
+    function genData(){
+        var size = getRandomInt( 20, 100 );
+        var data = [];
+        for( var i = 0; i < size; i++ ) {
+            var x = getRandomInt( 0, 100 );
+            var y = getRandomInt( 0, 100 );
+            data.push( { x:x, y:y });
+        }
+        return data;
+    };
+
+  </script>
 
 
 {% else %}
@@ -50,8 +108,10 @@
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ progress.num }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress.num }}%"></div>
     </div>
 
-    <canvas id="accuracy"></canvas>
+  <div class="container" width=50%>
+    <canvas id="accuracy" width="250" height="150"></canvas>
     <script>
+      // accuracy
       var ctx = document.getElementById('accuracy').getContext('2d');
       var accuracy = new Chart(ctx, {
         type: 'line',
@@ -73,10 +133,67 @@
         }
       });
     </script>
+  </div>
 
-  <div>{{ fpr }}</div>
-  <div>{{ tpr }}</div>
-  <div>{{ auc }}</div>
+
+    <canvas id="roc" width="200" height="200"></canvas>
+    <script>
+      // ROC
+      var line_y = d3.range(0, 1, 1/{{fpr}}.length);
+      var ctx = document.getElementById('roc').getContext('2d');
+      var roc = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ fpr }},
+          datasets: [{
+            label: 'ROC',
+            data: {{ tpr }},
+            backgroundColor: "rgba(153,255,51,0.4)",
+            borderColor: "rgba(153,255,51,0.4)",
+            lineTension: 0
+          }, {
+            label: 'y=x',
+            data: line_y,
+            lineTension: 0,
+            fill: false,
+            pointRadius: 0,
+            borderDash: [0.1, 0.1],
+            borderColor: "rgb(0,0,0)"
+          }]
+        }
+      });
+    </script>
+    <canvas id="pca" width="200" height="200"></canvas>
+    <script>
+      // PCA plot
+      var ctx = document.getElementById('pca').getContext('2d');
+      var pca = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ pca_x }},
+          datasets: [{
+            label: 'pca',
+            data: {{ pca_y }},
+            backgroundColor: "rgba(225,95,150, 1)",
+            borderColor: "rgba(255,255,255,1)",
+            lineTension: 0
+          }]
+        }
+      });
+
+      // scatter plot data
+      function genData(){
+          var size = getRandomInt( 20, 100 );
+          var data = [];
+          for( var i = 0; i < size; i++ ) {
+              var x = getRandomInt( 0, 100 );
+              var y = getRandomInt( 0, 100 );
+              data.push( { x:x, y:y });
+          }
+          return data;
+      };
+    </script>
+
 
   {% else %}
     <div>データロード中...</div>

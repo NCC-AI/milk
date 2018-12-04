@@ -96,12 +96,12 @@ def update(pk, directory):
 
         # pca_x, pca_y = pca(model, x_train, layer_id=-1)
 
-        y_prediction = model.predict(x_test)
+        y_prediction = model.predict(x_train)
 
-        all_fpr, mean_tpr, auc = roc(y_test, y_prediction, nb_classes)
+        all_fpr, mean_tpr, auc = roc(y_train, y_prediction, nb_classes)
 
-        confusion_visualize(x_test, np.argmax(y_test, axis=1), y_prediction, [i for i in range(nb_classes)])
-        
+        confusion_visualize(x_train, np.argmax(y_train, axis=1), y_prediction, [i for i in range(nb_classes)])
+
 
         # print('pca_x: ', pca_x)
         # print('pca_y: ', pca_y)
@@ -136,7 +136,7 @@ def progress(request, pk):
         pca_int_list = [float(y) for y in pca_str_list]
         pca_y = pca_int_list
 
-    else: 
+    else:
         pca_x = [0]
         pca_y = [0]
 
@@ -159,7 +159,7 @@ def pca(model, images, layer_id=-2):
 
     # output in test mode = 0
     features = get_fc_layer_output([images, 0])[0]
-    
+
 
     # Convert the data set to the main component based on the analysis result
     transformed = fit_transform(features)
