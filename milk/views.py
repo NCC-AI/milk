@@ -51,13 +51,6 @@ class TrainView(generic.CreateView):
         p = Process(target=update, args=(progress_instance.pk, progress_instance.target), daemon=True)
         p.start()
 
-        """
-        context = {
-            'target_directory': target_dir,
-            'model': model.layers,
-            'files': files
-        }
-        """
         return redirect('milk:progress', pk=progress_instance.pk)
 
 
@@ -94,17 +87,11 @@ def update(pk, directory):
                             verbose=0
                             )
 
-        # pca_x, pca_y = pca(model, x_train, layer_id=-1)
-
         y_prediction = model.predict(x_train)
 
         all_fpr, mean_tpr, auc = roc(y_train, y_prediction, nb_classes)
 
         confusion_visualize(x_train, np.argmax(y_train, axis=1), y_prediction, [i for i in range(nb_classes)])
-
-
-        # print('pca_x: ', pca_x)
-        # print('pca_y: ', pca_y)
 
         # acc, val_accを数値で受け取る
         progress.history_set.create(
@@ -130,15 +117,15 @@ def progress(request, pk):
     if len(list(history.values_list('fpr'))) != 0:
         pca_str_list = json.loads(list(history.values_list('fpr'))[0][0])
         pca_int_list = [float(x) for x in pca_str_list]
-        pca_x = pca_int_list
+        fpr = pca_int_list
 
         pca_str_list = json.loads(list(history.values_list('tpr'))[0][0])
         pca_int_list = [float(y) for y in pca_str_list]
-        pca_y = pca_int_list
+        tpr = pca_int_list
 
     else:
-        pca_x = [0]
-        pca_y = [0]
+        fpr = [0]
+        tpr = [0]
 
     context = {
         'progress': progress,
@@ -146,47 +133,11 @@ def progress(request, pk):
         'epochs': list(history.values_list('epochs', flat=True)),
         'acc_list': list(history.values_list('acc', flat=True)),
         'val_acc_list': list(history.values_list('val_acc', flat=True)),
-        'fpr': pca_x,
-        'tpr': pca_y,
+        'fpr': fpr,
+        'tpr': tpr,
         'auc': list(history.values_list('auc', flat=True))
     }
     return render(request, 'milk/progress.html', context)
-
-def pca(model, images, layer_id=-2):
-    # layer_id = -2 , which means just before final output
-    get_fc_layer_output = k.function([model.layers[0].input, k.learning_phase()],
-                                    [model.layers[layer_id].output])
-
-    # output in test mode = 0
-    features = get_fc_layer_output([images, 0])[0]
-
-
-    # Convert the data set to the main component based on the analysis result
-    transformed = fit_transform(features)
-
-    return list(transformed[:, 0].astype('str')), list(transformed[:, 1].astype('str'))
-
-def fit_transform(x):
-    n_components = 2
-
-    # 平均を0にする
-    x = x - x.mean(axis=0)
-    cov_ = np.cov(x, rowvar=False)
-
-    # 固有値と固有ベクトルを求めて固有値の大きい順にソート
-    l, v = np.linalg.eig(cov_)
-    l_index = np.argsort(l)[::-1]
-    v_ = v[:,l_index] # 列ベクトルなのに注意
-
-    # components_（固有ベクトル行列を途中まで取り出す）を作る
-    components_ = v_[:,:n_components].T
-
-    # データとcomponents_をかける
-    # 上と下で二回転置してるのアホ・・・
-    T = (np.mat(x)*(np.mat(components_.T))).A
-
-    # 出力
-    return T
 
 def roc(y_test, y_prediction, num_classes):
     # Compute ROC curve and ROC area for each class
